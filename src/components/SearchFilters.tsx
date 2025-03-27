@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Filter, initialFilter, genres, conditions } from '@/lib/data';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
@@ -8,9 +7,10 @@ interface SearchFiltersProps {
   filter: Filter;
   setFilter: (filter: Filter) => void;
   onSearch: () => void;
+  isMobile?: boolean; // Add isMobile as an optional prop
 }
 
-const SearchFilters = ({ filter, setFilter, onSearch }: SearchFiltersProps) => {
+const SearchFilters = ({ filter, setFilter, onSearch, isMobile = false }: SearchFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const handleReset = () => {
