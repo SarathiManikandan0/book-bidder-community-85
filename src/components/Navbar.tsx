@@ -1,12 +1,15 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, User, ShoppingBag, Menu, X } from 'lucide-react';
+import { Search, User, ShoppingBag, Menu, X, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const isActive = (path: string) => location.pathname === path;
 
@@ -17,13 +20,44 @@ const Navbar = () => {
     { name: 'About', path: '/about' },
   ];
 
+  // Add scroll detection for better mobile header UI
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const showBackButton = location.pathname !== '/';
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-gray-100">
+    <header className={cn(
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
+      isScrolled 
+        ? "bg-white/95 backdrop-blur-sm shadow-sm" 
+        : "glassmorphism border-b border-gray-100"
+    )}>
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2 z-20">
-          <ShoppingBag className="w-6 h-6 text-book-accent" />
-          <span className="text-xl font-medium">Sharebook</span>
-        </Link>
+        <div className="flex items-center z-20">
+          {isMobile && showBackButton ? (
+            <button 
+              onClick={() => window.history.back()}
+              className="mr-2 p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          ) : null}
+          <Link to="/" className="flex items-center space-x-2">
+            <ShoppingBag className="w-6 h-6 text-book-accent" />
+            <span className="text-xl font-medium">Sharebook</span>
+          </Link>
+        </div>
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
@@ -44,7 +78,7 @@ const Navbar = () => {
         </nav>
         
         {/* Right icons */}
-        <div className="flex items-center space-x-6 z-20">
+        <div className="flex items-center space-x-4 z-20">
           <button className="p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors">
             <Search className="w-5 h-5" />
           </button>
@@ -56,22 +90,23 @@ const Navbar = () => {
           <button 
             className="md:hidden p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
       
-      {/* Mobile menu */}
+      {/* Mobile menu - improved for better mobile UX */}
       {isMenuOpen && (
-        <div className="md:hidden absolute top-0 left-0 right-0 h-screen bg-white pt-20 px-6 z-10 animate-slide-in">
+        <div className="md:hidden fixed top-0 left-0 right-0 bottom-0 bg-white pt-20 px-6 z-10 animate-fade-in overflow-auto">
           <nav className="flex flex-col space-y-6 mt-6">
             {navLinks.map((link) => (
               <Link 
                 key={link.path} 
                 to={link.path}
                 className={cn(
-                  "text-lg font-medium py-2 border-b border-gray-100",
+                  "text-lg font-medium py-4 border-b border-gray-100 flex items-center",
                   isActive(link.path) ? "text-book-accent" : "text-gray-800"
                 )}
                 onClick={() => setIsMenuOpen(false)}

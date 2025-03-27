@@ -5,12 +5,15 @@ import { ChevronLeft } from 'lucide-react';
 import { books } from '@/lib/data';
 import Navbar from '@/components/Navbar';
 import BookDetail from '@/components/BookDetail';
+import BookDetailMobile from '@/components/BookDetailMobile';
 import BookCard from '@/components/BookCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const BookDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
   
   const book = books.find(book => book.id === id);
   
@@ -21,7 +24,7 @@ const BookDetails = () => {
           b.id !== book.id && 
           b.genre.some(g => book.genre.includes(g))
         )
-        .slice(0, 4)
+        .slice(0, isMobile ? 2 : 4)
     : [];
   
   useEffect(() => {
@@ -47,42 +50,51 @@ const BookDetails = () => {
   
   if (!book) return null;
 
+  // Handle navigation back
+  const handleNavigateBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="min-h-screen bg-book-paper">
       <Navbar />
       
-      <main className="pt-20 pb-20">
-        <div className="container px-4 md:px-6 mx-auto">
-          <div className="py-10">
-            <Link to="/books" className="inline-flex items-center text-gray-600 hover:text-book-accent mb-8 transition-colors">
+      <main className={`pt-20 pb-20 ${isMobile ? 'px-0' : ''}`}>
+        <div className={`container ${isMobile ? 'px-0' : 'px-4 md:px-6'} mx-auto`}>
+          {!isMobile && (
+            <Link to="/books" className="inline-flex items-center text-gray-600 hover:text-book-accent mb-8 transition-colors px-4">
               <ChevronLeft className="w-4 h-4 mr-1" />
               <span>Back to Books</span>
             </Link>
+          )}
             
+          {isMobile ? (
+            <BookDetailMobile book={book} onNavigateBack={handleNavigateBack} />
+          ) : (
             <BookDetail book={book} />
-            
-            {/* Similar Books Section */}
-            {similarBooks.length > 0 && (
-              <div className="mt-20">
-                <h2 className="text-2xl font-bold mb-6">You might also like</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {similarBooks.map((book, index) => (
-                    <BookCard 
-                      key={book.id} 
-                      book={book} 
-                      className="animate-fade-in"
-                      animationDelay={100 * index}
-                    />
-                  ))}
-                </div>
+          )}
+          
+          {/* Similar Books Section */}
+          {similarBooks.length > 0 && (
+            <div className={`mt-12 ${isMobile ? 'px-4' : ''}`}>
+              <h2 className="text-xl font-bold mb-6">You might also like</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {similarBooks.map((book, index) => (
+                  <BookCard 
+                    key={book.id} 
+                    book={book} 
+                    className="animate-fade-in"
+                    animationDelay={100 * index}
+                  />
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </main>
       
-      {/* Footer */}
-      <footer className="bg-gray-100 py-8">
+      {/* Footer - simplified for mobile */}
+      <footer className="bg-gray-100 py-6">
         <div className="container px-4 md:px-6 mx-auto text-center text-gray-500 text-sm">
           <p>&copy; {new Date().getFullYear()} Sharebook. All rights reserved.</p>
         </div>
