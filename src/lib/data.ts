@@ -64,7 +64,7 @@ export const books: Book[] = [
     title: "Dune",
     author: "Frank Herbert",
     coverImage: "https://images.unsplash.com/photo-1598618589929-b58a4a4e3a8d?w=620&auto=format&fit=crop",
-    description: "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the "spice" melange, a drug capable of extending life and enhancing consciousness. Coveted across the known universe, melange is a prize worth killing for...",
+    description: 'Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the "spice" melange, a drug capable of extending life and enhancing consciousness. Coveted across the known universe, melange is a prize worth killing for...',
     price: 35.50,
     condition: "New",
     genre: ["Science Fiction", "Fantasy", "Classic"],
