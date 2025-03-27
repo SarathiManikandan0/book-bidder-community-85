@@ -1,6 +1,7 @@
 
 import { Book } from '@/lib/data';
 import { Check, Award, Clock, AlertCircle } from 'lucide-react';
+import LiveBidInterface from './LiveBidInterface';
 
 interface BookDetailProps {
   book: Book;
@@ -136,33 +137,7 @@ const BookDetail = ({ book }: BookDetailProps) => {
           {/* Price or Auction section */}
           <div className="p-5 rounded-lg bg-gray-50 border border-gray-100">
             {isAuction && auctionData ? (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Current Bid</p>
-                    <p className="text-3xl font-bold text-book-bidding">{formattedPrice}</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {auctionData.bidsCount} {auctionData.bidsCount === 1 ? 'bid' : 'bids'} so far
-                    </p>
-                  </div>
-                  
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-center text-gray-700 mb-1">
-                      <Clock className="w-4 h-4 mr-1" />
-                      <span className="text-sm">{timeLeft()}</span>
-                    </div>
-                    
-                    {auctionData.highDemand && (
-                      <div className="flex items-center text-amber-500">
-                        <Award className="w-4 h-4 mr-1" />
-                        <span className="text-sm font-medium">High Demand Item</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <BidInterface book={book} />
-              </div>
+              <LiveBidInterface book={book} />
             ) : (
               <div className="flex justify-between items-center">
                 <div>
@@ -189,34 +164,6 @@ const BookDetail = ({ book }: BookDetailProps) => {
             </p>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
-
-const BidInterface = ({ book }: { book: Book }) => {
-  const { auctionData } = book;
-  
-  if (!auctionData) return null;
-  
-  const minBid = auctionData.currentBid + 1;
-  
-  return (
-    <div>
-      <div className="flex space-x-2">
-        <div className="flex-grow">
-          <input
-            type="number"
-            min={minBid}
-            step="1"
-            defaultValue={minBid}
-            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-book-accent/20 focus:border-book-accent transition-all"
-          />
-          <p className="text-xs text-gray-500 mt-1">Enter {minBid.toFixed(2)} or more</p>
-        </div>
-        <button className="px-6 py-2 bg-book-bidding text-white rounded-md hover:bg-book-bidding/90 transition-colors">
-          Place Bid
-        </button>
       </div>
     </div>
   );

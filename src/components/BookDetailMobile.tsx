@@ -19,6 +19,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import LiveBidInterface from './LiveBidInterface';
 
 interface BookDetailMobileProps {
   book: Book;
@@ -136,6 +137,22 @@ const BookDetailMobile = ({ book, onNavigateBack }: BookDetailMobileProps) => {
           </div>
         </div>
         
+        {/* Auction or Buy Section */}
+        {book.isAuction ? (
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 mb-6">
+            <LiveBidInterface book={book} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <Button className="w-full bg-book-accent hover:bg-book-accent/90">
+              Buy Now (${book.price.toFixed(2)})
+            </Button>
+            <Button variant="outline" className="w-full">
+              Add to Cart
+            </Button>
+          </div>
+        )}
+        
         {/* Seller info */}
         <div className="mb-8">
           <h3 className="text-lg font-medium mb-3">Seller</h3>
@@ -153,29 +170,6 @@ const BookDetailMobile = ({ book, onNavigateBack }: BookDetailMobileProps) => {
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Action buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          {book.isAuction ? (
-            <>
-              <Button className="w-full bg-book-accent hover:bg-book-accent/90">
-                Place Bid
-              </Button>
-              <Button variant="outline" className="w-full">
-                Ask Question
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button className="w-full bg-book-accent hover:bg-book-accent/90">
-                Buy Now (${book.price.toFixed(2)})
-              </Button>
-              <Button variant="outline" className="w-full">
-                Add to Cart
-              </Button>
-            </>
-          )}
         </div>
       </div>
     </div>
