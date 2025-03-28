@@ -13,9 +13,9 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import PricingPlans from "./pages/PricingPlans";
 import Profile from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
+import PricingPlans from "./pages/PricingPlans";
 
 const queryClient = new QueryClient();
 
