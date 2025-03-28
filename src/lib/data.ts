@@ -1,4 +1,3 @@
-
 export interface Book {
   id: string;
   title: string;
@@ -10,6 +9,7 @@ export interface Book {
   genre: string[];
   language: string;
   isAuction: boolean;
+  listedDate?: string;
   auctionData?: {
     currentBid: number;
     startingBid: number;
@@ -41,6 +41,7 @@ export const books: Book[] = [
     genre: ["Fiction", "Philosophy", "Adventure"],
     language: "English",
     isAuction: true,
+    listedDate: "2024-03-20T14:56:29.000Z",
     auctionData: {
       currentBid: 52.00,
       startingBid: 19.99,
@@ -184,6 +185,15 @@ export const books: Book[] = [
     views: 1654
   }
 ];
+
+books.forEach(book => {
+  if (!book.listedDate) {
+    const randomDays = Math.floor(Math.random() * 30) + 1;
+    const date = new Date();
+    date.setDate(date.getDate() - randomDays);
+    book.listedDate = date.toISOString();
+  }
+});
 
 export const featuredBooks = books.filter(book => book.isAuction && book.auctionData?.highDemand).slice(0, 2);
 
