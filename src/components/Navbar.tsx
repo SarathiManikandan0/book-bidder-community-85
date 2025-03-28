@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, User, ShoppingBag, Menu, X, ArrowLeft, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ const Navbar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const { isAuthenticated, user, logout } = useAuth();
+  const menuRef = useRef<HTMLDivElement>(null);
   
   const isActive = (path: string) => location.pathname === path;
 
@@ -45,10 +46,33 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node) && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
   const showBackButton = location.pathname !== '/';
 
   const handleLogout = () => {
     logout();
+    setIsMenuOpen(false);
   };
 
   return (
@@ -101,11 +125,11 @@ const Navbar = () => {
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors">
+                <button className="p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors">
                   <User className="w-5 h-5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 mr-4 bg-white" align="end">
+              <DropdownMenuContent className="w-56 mr-4 bg-white z-[100]" align="end">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
                     <span className="font-medium">{user?.name}</span>
@@ -129,14 +153,14 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link to="/signin" className="p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors">
+            <Link to="/signin" className="p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors">
               <User className="w-5 h-5" />
             </Link>
           )}
           
           {/* Mobile menu button */}
           <button 
-            className="md:hidden p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors"
+            className="md:hidden p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
@@ -147,7 +171,10 @@ const Navbar = () => {
       
       {/* Mobile menu - improved for better mobile UX */}
       {isMenuOpen && (
-        <div className="md:hidden fixed top-0 left-0 right-0 bottom-0 bg-white pt-20 px-6 z-10 animate-fade-in overflow-auto">
+        <div 
+          ref={menuRef}
+          className="md:hidden fixed top-0 left-0 right-0 bottom-0 bg-white pt-20 px-6 z-10 animate-fade-in overflow-auto"
+        >
           <nav className="flex flex-col space-y-6 mt-6">
             {navLinks.map((link) => (
               <Link 
