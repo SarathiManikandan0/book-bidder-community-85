@@ -1,15 +1,25 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, User, ShoppingBag, Menu, X, ArrowLeft } from 'lucide-react';
+import { Search, User, ShoppingBag, Menu, X, ArrowLeft, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { isAuthenticated, user, logout } = useAuth();
   
   const isActive = (path: string) => location.pathname === path;
 
@@ -18,6 +28,7 @@ const Navbar = () => {
     { name: 'Books', path: '/books' },
     { name: 'Auctions', path: '/auctions' },
     { name: 'About', path: '/about' },
+    { name: 'Pricing', path: '/pricing' },
   ];
 
   // Add scroll detection for better mobile header UI
@@ -35,6 +46,10 @@ const Navbar = () => {
   }, []);
 
   const showBackButton = location.pathname !== '/';
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <header className={cn(
@@ -82,9 +97,42 @@ const Navbar = () => {
           <button className="p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors">
             <Search className="w-5 h-5" />
           </button>
-          <button className="p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors">
-            <User className="w-5 h-5" />
-          </button>
+          
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors">
+                  <User className="w-5 h-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 mr-4 bg-white" align="end">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{user?.name}</span>
+                    <span className="text-xs text-gray-500">{user?.email}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">Profile</Link>
+                </DropdownMenuItem>
+                {user?.role === 'admin' && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="cursor-pointer">Dashboard</Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/signin" className="p-1 rounded-full text-gray-600 hover:text-book-accent transition-colors">
+              <User className="w-5 h-5" />
+            </Link>
+          )}
           
           {/* Mobile menu button */}
           <button 
@@ -114,6 +162,54 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+            
+            {!isAuthenticated ? (
+              <>
+                <Link 
+                  to="/signin"
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link 
+                  to="/signup"
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link 
+                  to="/profile"
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                {user?.role === 'admin' && (
+                  <Link 
+                    to="/dashboard"
+                    className="text-lg font-medium py-4 border-b border-gray-100 flex items-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                <button 
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center text-red-500"
+                  onClick={() => {
+                    logout();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </button>
+              </>
+            )}
           </nav>
         </div>
       )}
