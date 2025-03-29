@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, User, ShoppingBag, Menu, X, ArrowLeft, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -18,6 +18,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { isAuthenticated, user, logout } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -75,6 +76,11 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsMenuOpen(false);
+  };
+
   return (
     <header className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
@@ -129,7 +135,7 @@ const Navbar = () => {
                   <User className="w-5 h-5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 mr-4 bg-white z-[100]" align="end">
+              <DropdownMenuContent className="w-56 mr-4 z-[100]" align="end">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
                     <span className="font-medium">{user?.name}</span>
@@ -137,14 +143,17 @@ const Navbar = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="cursor-pointer">Profile</Link>
+                <DropdownMenuItem onSelect={() => navigate('/profile')}>
+                  Profile
                 </DropdownMenuItem>
                 {user?.role === 'admin' && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard" className="cursor-pointer">Dashboard</Link>
+                  <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
+                    Dashboard
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem onSelect={() => navigate('/sell')}>
+                  Sell Books
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer">
                   <LogOut className="w-4 h-4 mr-2" />
@@ -177,56 +186,57 @@ const Navbar = () => {
         >
           <nav className="flex flex-col space-y-6 mt-6">
             {navLinks.map((link) => (
-              <Link 
+              <button 
                 key={link.path} 
-                to={link.path}
+                onClick={() => handleNavigation(link.path)}
                 className={cn(
-                  "text-lg font-medium py-4 border-b border-gray-100 flex items-center",
+                  "text-lg font-medium py-4 border-b border-gray-100 flex items-center text-left w-full",
                   isActive(link.path) ? "text-book-accent" : "text-gray-800"
                 )}
-                onClick={() => setIsMenuOpen(false)}
               >
                 {link.name}
-              </Link>
+              </button>
             ))}
             
             {!isAuthenticated ? (
               <>
-                <Link 
-                  to="/signin"
-                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center"
-                  onClick={() => setIsMenuOpen(false)}
+                <button 
+                  onClick={() => handleNavigation('/signin')}
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center text-left w-full"
                 >
                   Sign In
-                </Link>
-                <Link 
-                  to="/signup"
-                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center"
-                  onClick={() => setIsMenuOpen(false)}
+                </button>
+                <button 
+                  onClick={() => handleNavigation('/signup')}
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center text-left w-full"
                 >
                   Sign Up
-                </Link>
+                </button>
               </>
             ) : (
               <>
-                <Link 
-                  to="/profile"
-                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center"
-                  onClick={() => setIsMenuOpen(false)}
+                <button 
+                  onClick={() => handleNavigation('/profile')}
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center text-left w-full"
                 >
                   Profile
-                </Link>
+                </button>
+                <button 
+                  onClick={() => handleNavigation('/sell')}
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center text-left w-full"
+                >
+                  Sell Books
+                </button>
                 {user?.role === 'admin' && (
-                  <Link 
-                    to="/dashboard"
-                    className="text-lg font-medium py-4 border-b border-gray-100 flex items-center"
-                    onClick={() => setIsMenuOpen(false)}
+                  <button 
+                    onClick={() => handleNavigation('/dashboard')}
+                    className="text-lg font-medium py-4 border-b border-gray-100 flex items-center text-left w-full"
                   >
                     Dashboard
-                  </Link>
+                  </button>
                 )}
                 <button 
-                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center text-red-500"
+                  className="text-lg font-medium py-4 border-b border-gray-100 flex items-center text-red-500 text-left w-full"
                   onClick={() => {
                     logout();
                     setIsMenuOpen(false);

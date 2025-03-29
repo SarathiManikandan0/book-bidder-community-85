@@ -1,202 +1,139 @@
 
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, CheckCircle2, XCircle } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { CheckCircle } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const PricingPlans = () => {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-
-  const handleSubscribe = (plan: string) => {
-    setSelectedPlan(plan);
-    toast({
-      title: "Subscription Updated",
-      description: `You are now subscribed to the ${plan} plan.`,
-      duration: 3000,
-    });
+  
+  const plans = [
+    {
+      name: "Free",
+      price: "₹0",
+      period: "forever",
+      description: "Basic features for casual book lovers",
+      features: [
+        "Browse all books",
+        "Buy books directly",
+        "List up to 5 books for sale",
+        "Basic search filters"
+      ]
+    },
+    {
+      name: "Premium",
+      price: "₹399",
+      period: "month",
+      description: "Enhanced features for serious readers",
+      features: [
+        "All Free features",
+        "Priority listing placement",
+        "Unlimited book listings",
+        "Participate in auctions",
+        "Advanced search filters",
+        "Price negotiation tool",
+        "No platform fees"
+      ],
+      featured: true
+    },
+    {
+      name: "Academic",
+      price: "₹899",
+      period: "semester",
+      description: "Perfect for students and educators",
+      features: [
+        "All Premium features",
+        "Textbook price alerts",
+        "Bulk discounts",
+        "Campus delivery options",
+        "Academic resource access",
+        "Special semester deals"
+      ]
+    }
+  ];
+  
+  const handleSelectPlan = (planName: string) => {
+    setSelectedPlan(planName);
+    
+    if (!isAuthenticated) {
+      navigate("/signin", { state: { returnUrl: "/pricing", selectedPlan: planName } });
+      return;
+    }
+    
+    // Here you would handle the subscription process
+    // For now, just log the selection
+    console.log(`Selected plan: ${planName}`);
   };
-
+  
   return (
     <div className="min-h-screen bg-book-paper">
       <Navbar />
       
-      <div className="container mx-auto max-w-5xl py-24 px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Plan</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Select the perfect plan that suits your book trading needs. Upgrade anytime to access premium features.
+      <main className="container mx-auto px-4 py-16 pt-28">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Reading Journey</h1>
+          <p className="text-gray-600 text-lg">
+            Select the perfect plan to enhance your book trading experience on Sharebook
           </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Free Plan */}
-          <Card className="border-2 hover:border-book-accent transition-all duration-300 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-2xl">Free Plan</CardTitle>
-              <div className="mt-2">
-                <span className="text-3xl font-bold">$0</span>
-                <span className="text-sm text-gray-500 ml-1">/month</span>
-              </div>
-              <CardDescription>Basic features for casual book traders</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>List up to 10 books</span>
-                </li>
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>Basic search functionality</span>
-                </li>
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>Message other users</span>
-                </li>
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>View book details</span>
-                </li>
-                <li className="flex items-center opacity-50">
-                  <XCircle size={18} className="text-gray-400 mr-2" />
-                  <span>No access to auctions</span>
-                </li>
-                <li className="flex items-center opacity-50">
-                  <XCircle size={18} className="text-gray-400 mr-2" />
-                  <span>No priority in search results</span>
-                </li>
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button 
-                className="w-full" 
-                variant={selectedPlan === "Free" ? "default" : "outline"}
-                onClick={() => handleSubscribe("Free")}
-              >
-                {selectedPlan === "Free" ? "Current Plan" : "Get Started"}
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Premium Plan */}
-          <Card className="border-2 border-book-accent bg-gradient-to-b from-white to-purple-50 shadow-md scale-105 z-10">
-            <CardHeader>
-              <div className="bg-book-accent text-white text-xs font-semibold py-1 px-3 rounded-full w-fit">
-                RECOMMENDED
-              </div>
-              <CardTitle className="text-2xl mt-2">Premium Plan</CardTitle>
-              <div className="mt-2">
-                <span className="text-3xl font-bold">$5</span>
-                <span className="text-sm text-gray-500 ml-1">/month</span>
-              </div>
-              <CardDescription>Advanced features for serious book enthusiasts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <CheckCircle2 size={18} className="text-book-accent mr-2" />
-                  <span>Unlimited book listings</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle2 size={18} className="text-book-accent mr-2" />
-                  <span>Priority in search results</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle2 size={18} className="text-book-accent mr-2" />
-                  <span>Participate in rare book auctions</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle2 size={18} className="text-book-accent mr-2" />
-                  <span>Advanced analytics and insights</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle2 size={18} className="text-book-accent mr-2" />
-                  <span>Early access to new features</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle2 size={18} className="text-book-accent mr-2" />
-                  <span>Priority customer support</span>
-                </li>
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button 
-                className="w-full bg-book-accent hover:bg-book-accent/90"
-                onClick={() => handleSubscribe("Premium")}
-                variant={selectedPlan === "Premium" ? "default" : "default"}
-              >
-                {selectedPlan === "Premium" ? "Current Plan" : "Subscribe Now"}
-              </Button>
-            </CardFooter>
-          </Card>
-          
-          {/* Business Plan */}
-          <Card className="border-2 hover:border-book-accent transition-all duration-300 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-2xl">Business Plan</CardTitle>
-              <div className="mt-2">
-                <span className="text-3xl font-bold">$15</span>
-                <span className="text-sm text-gray-500 ml-1">/month</span>
-              </div>
-              <CardDescription>For bookstores and professional sellers</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>Unlimited book listings</span>
-                </li>
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>Host your own auctions</span>
-                </li>
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>Business analytics dashboard</span>
-                </li>
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>Bulk book uploads</span>
-                </li>
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>Custom storefront page</span>
-                </li>
-                <li className="flex items-center">
-                  <Check size={18} className="text-green-500 mr-2" />
-                  <span>API access</span>
-                </li>
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button 
-                className="w-full" 
-                variant={selectedPlan === "Business" ? "default" : "outline"}
-                onClick={() => handleSubscribe("Business")}
-              >
-                {selectedPlan === "Business" ? "Current Plan" : "Contact Sales"}
-              </Button>
-            </CardFooter>
-          </Card>
         </div>
         
-        <div className="text-center mt-12">
-          <p className="text-sm text-gray-500 mb-4">
-            All plans come with a 7-day money-back guarantee. No contracts, cancel anytime.
-          </p>
-          <p className="text-sm text-gray-500">
-            Questions? <span className="text-book-accent cursor-pointer">Contact our sales team</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {plans.map((plan) => (
+            <div 
+              key={plan.name}
+              className={`relative rounded-xl overflow-hidden border transition-all ${
+                plan.featured 
+                  ? "border-book-accent shadow-lg transform md:-translate-y-4"
+                  : "border-gray-200 hover:shadow-md hover:border-gray-300"
+              }`}
+            >
+              {plan.featured && (
+                <div className="absolute top-0 right-0 bg-book-accent text-white px-4 py-1 text-sm font-medium rounded-bl-lg">
+                  Popular
+                </div>
+              )}
+              
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
+                <div className="flex items-end mb-4">
+                  <span className="text-3xl font-bold">{plan.price}</span>
+                  <span className="text-gray-500 ml-1">/{plan.period}</span>
+                </div>
+                <p className="text-gray-600 mb-6">{plan.description}</p>
+                
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <Button 
+                  onClick={() => handleSelectPlan(plan.name)}
+                  className={`w-full ${
+                    plan.featured ? "bg-book-accent hover:bg-book-accent/90" : ""
+                  }`}
+                >
+                  {selectedPlan === plan.name ? "Plan Selected" : `Choose ${plan.name}`}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="text-center mt-12 text-gray-600 max-w-2xl mx-auto">
+          <p>
+            All plans include our base features. You can upgrade, downgrade, or cancel your subscription at any time.
+            For educational institutions seeking bulk licenses, please contact our sales team.
           </p>
         </div>
-      </div>
-      
-      <footer className="bg-gray-100 py-6">
-        <div className="container px-4 md:px-6 mx-auto text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Sharebook. All rights reserved.</p>
-        </div>
-      </footer>
+      </main>
     </div>
   );
 };
