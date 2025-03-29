@@ -1,14 +1,17 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Users, TrendingUp } from 'lucide-react';
+import { ArrowRight, BookOpen, Users, TrendingUp, ShoppingCart, BookPlus, BookMarked } from 'lucide-react';
 import BookCard from '@/components/BookCard';
 import FeaturedBook from '@/components/FeaturedBook';
 import Navbar from '@/components/Navbar';
+import UserDashboard from '@/components/UserDashboard';
+import { useAuth } from '@/contexts/AuthContext';
 import { books, featuredBooks } from '@/lib/data';
 
 const Index = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     // Simulate loading to ensure animations work properly
@@ -66,11 +69,89 @@ const Index = () => {
           </div>
         </section>
         
+        {/* User Dashboard */}
+        {isAuthenticated && (
+          <section className="py-8 bg-white">
+            <div className="container px-4 md:px-6 mx-auto">
+              <UserDashboard />
+            </div>
+          </section>
+        )}
+        
+        {/* Modules Section */}
+        <section className="py-16 bg-white">
+          <div className="container px-4 md:px-6 mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Explore Sharebook Features</h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <Link 
+                to="/sell"
+                className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-amber-200"
+              >
+                <div className="h-14 w-14 bg-amber-500/10 rounded-full flex items-center justify-center mb-4">
+                  <BookPlus className="h-6 w-6 text-amber-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Sell Books</h3>
+                <p className="text-gray-600 mb-4">List your books for sale and reach thousands of potential buyers.</p>
+                <div className="flex items-center text-amber-600 font-medium">
+                  <span>Sell now</span>
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </div>
+              </Link>
+              
+              <Link 
+                to="/books"
+                className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-blue-200"
+              >
+                <div className="h-14 w-14 bg-blue-500/10 rounded-full flex items-center justify-center mb-4">
+                  <ShoppingCart className="h-6 w-6 text-blue-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Buy Books</h3>
+                <p className="text-gray-600 mb-4">Browse our extensive collection of books for every subject and interest.</p>
+                <div className="flex items-center text-blue-600 font-medium">
+                  <span>Shop now</span>
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </div>
+              </Link>
+              
+              <Link 
+                to="/auctions"
+                className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-purple-200"
+              >
+                <div className="h-14 w-14 bg-purple-500/10 rounded-full flex items-center justify-center mb-4">
+                  <TrendingUp className="h-6 w-6 text-purple-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Bid on Auctions</h3>
+                <p className="text-gray-600 mb-4">Participate in auctions for rare and collectible books.</p>
+                <div className="flex items-center text-purple-600 font-medium">
+                  <span>View auctions</span>
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </div>
+              </Link>
+              
+              <Link 
+                to="/books"
+                className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-green-200"
+              >
+                <div className="h-14 w-14 bg-green-500/10 rounded-full flex items-center justify-center mb-4">
+                  <BookMarked className="h-6 w-6 text-green-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Academic Books</h3>
+                <p className="text-gray-600 mb-4">Find textbooks and academic resources for all courses and years.</p>
+                <div className="flex items-center text-green-600 font-medium">
+                  <span>Explore resources</span>
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+        
         {/* Stats Section */}
-        <section className="py-12 bg-white">
+        <section className="py-12 bg-gray-50">
           <div className="container px-4 md:px-6 mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="flex items-center space-x-4 p-6 border border-gray-100 rounded-xl shadow-smooth">
+              <div className="flex items-center space-x-4 p-6 border border-gray-100 bg-white rounded-xl shadow-smooth">
                 <div className="w-12 h-12 flex items-center justify-center bg-book-accent/10 text-book-accent rounded-full">
                   <BookOpen className="w-6 h-6" />
                 </div>
@@ -80,7 +161,7 @@ const Index = () => {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4 p-6 border border-gray-100 rounded-xl shadow-smooth">
+              <div className="flex items-center space-x-4 p-6 border border-gray-100 bg-white rounded-xl shadow-smooth">
                 <div className="w-12 h-12 flex items-center justify-center bg-book-accent/10 text-book-accent rounded-full">
                   <Users className="w-6 h-6" />
                 </div>
@@ -90,7 +171,7 @@ const Index = () => {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4 p-6 border border-gray-100 rounded-xl shadow-smooth">
+              <div className="flex items-center space-x-4 p-6 border border-gray-100 bg-white rounded-xl shadow-smooth">
                 <div className="w-12 h-12 flex items-center justify-center bg-book-accent/10 text-book-accent rounded-full">
                   <TrendingUp className="w-6 h-6" />
                 </div>
@@ -164,12 +245,12 @@ const Index = () => {
               Sign up today to start buying, selling, and bidding on books. Connect with fellow book lovers and build your personal library.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <button className="px-6 py-3 bg-white text-book-cover rounded-md hover:bg-gray-100 transition-colors">
+              <Link to="/signup" className="px-6 py-3 bg-white text-book-cover rounded-md hover:bg-gray-100 transition-colors">
                 Sign Up
-              </button>
-              <button className="px-6 py-3 bg-transparent border border-white text-white rounded-md hover:bg-white/10 transition-colors">
+              </Link>
+              <Link to="/books" className="px-6 py-3 bg-transparent border border-white text-white rounded-md hover:bg-white/10 transition-colors">
                 Learn More
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -193,27 +274,25 @@ const Index = () => {
               <div>
                 <h3 className="font-medium mb-4">Platform</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><a href="#" className="hover:text-book-accent">How it Works</a></li>
-                  <li><a href="#" className="hover:text-book-accent">Pricing</a></li>
-                  <li><a href="#" className="hover:text-book-accent">FAQ</a></li>
+                  <li><Link to="/books" className="hover:text-book-accent">Browse Books</Link></li>
+                  <li><Link to="/sell" className="hover:text-book-accent">Sell Books</Link></li>
+                  <li><Link to="/auctions" className="hover:text-book-accent">Auctions</Link></li>
                 </ul>
               </div>
               
               <div>
                 <h3 className="font-medium mb-4">Company</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><a href="#" className="hover:text-book-accent">About Us</a></li>
-                  <li><a href="#" className="hover:text-book-accent">Careers</a></li>
-                  <li><a href="#" className="hover:text-book-accent">Contact</a></li>
+                  <li><Link to="/about" className="hover:text-book-accent">About Us</Link></li>
+                  <li><Link to="/pricing" className="hover:text-book-accent">Pricing</Link></li>
+                  <li><Link to="/contact" className="hover:text-book-accent">Contact</Link></li>
                 </ul>
               </div>
               
               <div>
                 <h3 className="font-medium mb-4">Legal</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><a href="#" className="hover:text-book-accent">Privacy Policy</a></li>
                   <li><a href="#" className="hover:text-book-accent">Terms of Service</a></li>
-                  <li><a href="#" className="hover:text-book-accent">Cookie Policy</a></li>
                 </ul>
               </div>
             </div>
