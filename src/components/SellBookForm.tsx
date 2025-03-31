@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { BookService } from "@/lib/bookService";
 import { FileService, UploadedFile } from "@/lib/fileService";
-import { toast as sonnerToast } from "@/components/ui/sonner";
+import { toast as sonnerToast } from "sonner";
 import { Upload, Image, X, Loader2 } from "lucide-react";
 import {
   Select,
@@ -27,12 +26,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+type BookCondition = "New" | "Like New" | "Very Good" | "Good" | "Fair" | "Poor";
+
 type BookFormData = {
   title: string;
   author: string;
   description: string;
   price: string;
-  condition: string;
+  condition: BookCondition;
   year: string;
   course: string;
   branch: string;
@@ -85,14 +86,12 @@ const SellBookForm = () => {
     setIsUploading(true);
     
     try {
-      // Show preview
       const reader = new FileReader();
       reader.onload = () => {
         setFilePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
       
-      // Upload the file
       const uploadedFile = await FileService.uploadImage(file);
       setUploadedFile(uploadedFile);
       setFormData(prev => ({ ...prev, coverImage: uploadedFile.url }));
@@ -134,7 +133,6 @@ const SellBookForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Create a book listing with the uploaded image
       if (!user) throw new Error("User data not available");
       
       const bookData = {
@@ -145,7 +143,7 @@ const SellBookForm = () => {
         seller: {
           id: user.id,
           name: user.name,
-          rating: 4.5, // Default rating for new sellers
+          rating: 4.5,
           avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=250"
         }
       };
@@ -157,12 +155,10 @@ const SellBookForm = () => {
         description: "Your book has been listed for sale",
       });
       
-      // Reset form
       setFormData(initialFormData);
       setFilePreview(null);
       setUploadedFile(null);
       
-      // Navigate to the book details page
       navigate(`/books/${newBook.id}`);
     } catch (error) {
       console.error("Error listing book:", error);
@@ -186,7 +182,6 @@ const SellBookForm = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Book Cover Image Upload */}
           <div className="space-y-2">
             <Label>Book Cover Image</Label>
             <div className="flex items-center gap-4">
@@ -297,7 +292,7 @@ const SellBookForm = () => {
               <Label htmlFor="condition">Condition*</Label>
               <Select 
                 value={formData.condition} 
-                onValueChange={(value) => handleSelectChange("condition", value)}
+                onValueChange={(value: BookCondition) => setFormData(prev => ({ ...prev, condition: value }))}
               >
                 <SelectTrigger id="condition">
                   <SelectValue placeholder="Select condition" />
@@ -316,7 +311,7 @@ const SellBookForm = () => {
               <Label htmlFor="language">Language</Label>
               <Select 
                 value={formData.language} 
-                onValueChange={(value) => handleSelectChange("language", value)}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, language: value }))}
               >
                 <SelectTrigger id="language">
                   <SelectValue placeholder="Select language" />
@@ -363,7 +358,7 @@ const SellBookForm = () => {
               <Label htmlFor="year">Academic Year</Label>
               <Select 
                 value={formData.year} 
-                onValueChange={(value) => handleSelectChange("year", value)}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, year: value }))}
               >
                 <SelectTrigger id="year">
                   <SelectValue placeholder="Select year" />

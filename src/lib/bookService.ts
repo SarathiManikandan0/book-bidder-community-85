@@ -2,9 +2,13 @@
 import { Book } from './data';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Define the allowed book conditions
+export type BookCondition = "New" | "Like New" | "Very Good" | "Good" | "Fair" | "Poor";
+
 // Extend the Book interface to include a seller ID
 export interface BookWithSeller extends Book {
   sellerId: string;
+  condition: BookCondition;
 }
 
 export class BookService {
@@ -34,7 +38,7 @@ export class BookService {
       coverImage: book.coverImage || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop',
       description: book.description || '',
       price: book.price ? parseFloat(book.price.toString()) : 0,
-      condition: book.condition as any || 'Good',
+      condition: book.condition || 'Good',
       genre: book.genre as string[] || ['Academic'],
       language: book.language || 'English',
       isAuction: book.isAuction || false,
