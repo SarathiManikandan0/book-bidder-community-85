@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, User, ShoppingBag, Menu, X, ArrowLeft, LogOut } from 'lucide-react';
+import { Search, User, ShoppingBag, Menu, X, ArrowLeft, LogOut, BadgeIndianRupee } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,7 +106,7 @@ const Navbar = () => {
             </button>
           ) : null}
           <Link to="/" className="flex items-center space-x-2">
-            <ShoppingBag className="w-6 h-6 text-book-accent" />
+            <BadgeIndianRupee className="w-6 h-6 text-book-accent" /> {/* Changed to Indian Rupee icon */}
             <span className="text-xl font-medium">Sharebook</span>
           </Link>
         </div>
@@ -128,58 +135,155 @@ const Navbar = () => {
             <Search className="w-5 h-5" />
           </button>
           
+          {/* User menu - Using Sheet for mobile and DropdownMenu for desktop */}
           {isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors">
-                  <User className="w-5 h-5" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 mr-4 z-[100]" align="end">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{user?.name}</span>
-                    <span className="text-xs text-gray-500">{user?.email}</span>
+            isMobile ? (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <button className="p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors">
+                    <User className="w-5 h-5" />
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="rounded-t-xl pt-6">
+                  <SheetHeader className="text-left pb-4 border-b">
+                    <SheetTitle className="flex flex-col">
+                      <span className="font-medium">{user?.name}</span>
+                      <span className="text-xs text-gray-500">{user?.email}</span>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="py-4 space-y-3">
+                    <button 
+                      className="w-full text-left py-3 px-2 hover:bg-gray-100 rounded-md"
+                      onClick={() => handleNavigation('/profile')}
+                    >
+                      Profile
+                    </button>
+                    {user?.role === 'admin' && (
+                      <button 
+                        className="w-full text-left py-3 px-2 hover:bg-gray-100 rounded-md"
+                        onClick={() => handleNavigation('/dashboard')}
+                      >
+                        Dashboard
+                      </button>
+                    )}
+                    <button 
+                      className="w-full text-left py-3 px-2 hover:bg-gray-100 rounded-md"
+                      onClick={() => handleNavigation('/sell')}
+                    >
+                      Sell Books
+                    </button>
+                    <button 
+                      className="w-full text-left py-3 px-2 hover:bg-gray-100 rounded-md text-red-500"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="w-4 h-4 mr-2 inline-block" />
+                      Logout
+                    </button>
                   </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => navigate('/profile')}>
-                  Profile
-                </DropdownMenuItem>
-                {user?.role === 'admin' && (
-                  <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
-                    Dashboard
+                </SheetContent>
+              </Sheet>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors">
+                    <User className="w-5 h-5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 mr-4 z-[100]" align="end">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{user?.name}</span>
+                      <span className="text-xs text-gray-500">{user?.email}</span>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => navigate('/profile')}>
+                    Profile
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onSelect={() => navigate('/sell')}>
-                  Sell Books
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  <span>Logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {user?.role === 'admin' && (
+                    <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
+                      Dashboard
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onSelect={() => navigate('/sell')}>
+                    Sell Books
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
           ) : (
             <Link to="/signin" className="p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors">
               <User className="w-5 h-5" />
             </Link>
           )}
           
-          {/* Mobile menu button */}
-          <button 
-            className="md:hidden p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Mobile menu button - replacing dropdown with Sheet for mobile */}
+          {isMobile ? (
+            <Sheet>
+              <SheetTrigger asChild>
+                <button 
+                  className="p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors"
+                  aria-label="Menu"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[80%] max-w-sm">
+                <SheetHeader className="text-left mb-6">
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col space-y-1">
+                  {navLinks.map((link) => (
+                    <button 
+                      key={link.path} 
+                      onClick={() => handleNavigation(link.path)}
+                      className={cn(
+                        "text-lg font-medium py-3 border-b border-gray-100 flex items-center text-left w-full",
+                        isActive(link.path) ? "text-book-accent" : "text-gray-800"
+                      )}
+                    >
+                      {link.name}
+                    </button>
+                  ))}
+                
+                  {!isAuthenticated && (
+                    <>
+                      <button 
+                        onClick={() => handleNavigation('/signin')}
+                        className="text-lg font-medium py-3 border-b border-gray-100 flex items-center text-left w-full"
+                      >
+                        Sign In
+                      </button>
+                      <button 
+                        onClick={() => handleNavigation('/signup')}
+                        className="text-lg font-medium py-3 border-b border-gray-100 flex items-center text-left w-full"
+                      >
+                        Sign Up
+                      </button>
+                    </>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <button 
+              className="md:hidden p-2 rounded-full text-gray-600 hover:text-book-accent transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          )}
         </div>
       </div>
       
       {/* Mobile menu - improved for better mobile UX */}
-      {isMenuOpen && (
+      {isMenuOpen && !isMobile && (
         <div 
           ref={menuRef}
           className="md:hidden fixed top-0 left-0 right-0 bottom-0 bg-white pt-20 px-6 z-10 animate-fade-in overflow-auto"

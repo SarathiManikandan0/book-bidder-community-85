@@ -93,6 +93,11 @@ export class BookService {
     return true;
   }
 
+  // Format price to display in Indian Rupees (₹)
+  static formatPrice(price: number): string {
+    return `₹${price.toFixed(2)}`;
+  }
+
   // Initialize with sample books if empty
   static initializeWithSampleBooks(): void {
     const existingBooks = this.getAllBooks();

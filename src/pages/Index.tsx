@@ -8,7 +8,7 @@ import FeaturedBook from '@/components/FeaturedBook';
 import { BookService } from '@/lib/bookService';
 import { Book, Filter, initialFilter, filterBooks } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { BookOpen, ArrowRight } from 'lucide-react';
+import { BookOpen, ArrowRight, BadgeIndianRupee } from 'lucide-react';
 
 const Index = () => {
   const [allBooks, setAllBooks] = useState<Book[]>([]);

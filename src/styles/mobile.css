@@ -31,6 +31,23 @@
   select {
     font-size: 16px; /* Prevents iOS zoom on focus */
   }
+  
+  /* Fix for dropdown menus on mobile */
+  [data-radix-popper-content-wrapper] {
+    z-index: 999 !important; /* Ensure dropdowns appear above other elements */
+  }
+  
+  .mobile-dropdown {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 999;
+    background-color: white;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+  }
 }
 
 /* Shared responsive styles */
@@ -74,4 +91,12 @@
 
 .shadow-smooth {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix for dropdown menus on all devices */
+.dropdown-menu-content {
+  z-index: 999 !important;
+  background-color: white !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }

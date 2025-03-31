@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import LiveBidInterface from './LiveBidInterface';
+import { BookService } from '@/lib/bookService';
 
 interface BookDetailMobileProps {
   book: Book;
@@ -65,7 +66,7 @@ const BookDetailMobile = ({ book, onNavigateBack }: BookDetailMobileProps) => {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm font-medium">Current bid</p>
-                <p className="text-xl font-bold">${book.auctionData.currentBid.toFixed(2)}</p>
+                <p className="text-xl font-bold">{BookService.formatPrice(book.auctionData.currentBid)}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm">{book.auctionData.bidsCount} bids</p>
@@ -145,7 +146,7 @@ const BookDetailMobile = ({ book, onNavigateBack }: BookDetailMobileProps) => {
         ) : (
           <div className="grid grid-cols-2 gap-3 mb-6">
             <Button className="w-full bg-book-accent hover:bg-book-accent/90">
-              Buy Now (${book.price.toFixed(2)})
+              Buy Now ({BookService.formatPrice(book.price)})
             </Button>
             <Button variant="outline" className="w-full">
               Add to Cart

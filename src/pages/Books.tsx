@@ -143,7 +143,7 @@ const Books = () => {
                       </p>
                       <div className="mt-auto flex items-center justify-between">
                         <span className="font-medium">
-                          ${book.price.toFixed(2)}
+                          {BookService.formatPrice(book.price)}
                         </span>
                         <Button 
                           variant="link" 
