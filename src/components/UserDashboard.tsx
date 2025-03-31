@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { BookOpen, PackageCheck, TrendingUp, ShoppingCart } from "lucide-react";
+import { BookOpen, PackageCheck, TrendingUp, ShoppingCart, Edit, Trash2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BookService } from "@/lib/bookService";
+import { Book } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -17,14 +19,20 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
-interface UserBook {
-  id: string;
-  title: string;
-  author: string;
-  price: string;
-  condition: string;
-  listingDate: string;
+interface UserBook extends Book {
+  sellerId: string;
 }
 
 interface UserBid {
@@ -41,7 +49,25 @@ const UserDashboard = () => {
   const [myBooks, setMyBooks] = useState<UserBook[]>([]);
   const [myBids, setMyBids] = useState<UserBid[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [bookToDelete, setBookToDelete] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Load user's books from BookService
+  const loadUserBooks = () => {
+    if (!user) return;
+    
+    try {
+      const books = BookService.getBooksBySeller(user.id);
+      setMyBooks(books as UserBook[]);
+    } catch (error) {
+      console.error("Error fetching user books:", error);
+      toast({
+        title: "Failed to load your books",
+        description: "Please try refreshing the page",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -51,12 +77,8 @@ const UserDashboard = () => {
     const fetchUserData = async () => {
       setIsLoading(true);
       try {
-        // In a real app, these would be API calls
-        // For now, we'll use localStorage to simulate data persistence
-        
-        // Fetch user's listed books
-        const storedBooks = JSON.parse(localStorage.getItem("user_books") || "[]");
-        setMyBooks(storedBooks);
+        // Load user's books
+        loadUserBooks();
         
         // Mock bid data for demonstration
         const mockBids: UserBid[] = [
@@ -92,7 +114,40 @@ const UserDashboard = () => {
     };
     
     fetchUserData();
-  }, [isAuthenticated, toast]);
+  }, [isAuthenticated, user, toast]);
+
+  const handleDeleteBook = (bookId: string) => {
+    setBookToDelete(bookId);
+  };
+
+  const confirmDeleteBook = () => {
+    if (!bookToDelete) return;
+    
+    try {
+      const success = BookService.deleteBook(bookToDelete);
+      if (success) {
+        toast({
+          title: "Book deleted",
+          description: "Your book has been removed from the marketplace",
+        });
+        loadUserBooks(); // Reload books
+      } else {
+        toast({
+          title: "Failed to delete book",
+          description: "Book not found or already deleted",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete book",
+        variant: "destructive",
+      });
+    } finally {
+      setBookToDelete(null);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -199,28 +254,55 @@ const UserDashboard = () => {
             ) : myBooks.length > 0 ? (
               <div className="space-y-3">
                 {myBooks.map((book) => (
-                  <div key={book.id} className="p-3 border rounded-lg flex justify-between items-center">
-                    <div>
+                  <div key={book.id} className="p-3 border rounded-lg flex items-center">
+                    <div className="w-16 h-16 mr-3 flex-shrink-0">
+                      <img 
+                        src={book.coverImage} 
+                        alt={book.title}
+                        className="w-full h-full object-cover rounded"
+                      />
+                    </div>
+                    <div className="flex-1">
                       <h4 className="font-medium">{book.title}</h4>
                       <p className="text-sm text-gray-500">
-                        {book.author} · {book.condition} · ₹{book.price}
+                        {book.author} · {book.condition} · ${book.price.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Listed {new Date(book.listedDate || '').toLocaleDateString()}
                       </p>
                     </div>
-                    <Link
-                      to={`/books/${book.id}`}
-                      className="text-xs px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-                    >
-                      View
-                    </Link>
+                    <div className="flex space-x-2">
+                      <Link
+                        to={`/books/${book.id}`}
+                        className="text-xs px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                      >
+                        View
+                      </Link>
+                      <Link
+                        to={`/books/edit/${book.id}`}
+                        className="text-xs px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors flex items-center"
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteBook(book.id)}
+                        className="text-xs px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors flex items-center"
+                      >
+                        <Trash2 className="w-3 h-3 mr-1" />
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4 text-gray-500">
-                <p>You haven't listed any books yet</p>
+              <div className="text-center py-4 border rounded-lg flex flex-col items-center p-8">
+                <AlertCircle className="w-12 h-12 text-gray-300 mb-4" />
+                <p className="text-gray-500 mb-4">You haven't listed any books yet</p>
                 <Link
                   to="/sell"
-                  className="text-book-accent hover:underline mt-2 inline-block"
+                  className="px-4 py-2 bg-book-accent text-white rounded-md hover:bg-book-accent/90 transition-colors"
                 >
                   List a book for sale
                 </Link>
@@ -246,17 +328,18 @@ const UserDashboard = () => {
                       </span>
                     </div>
                     <p className="text-sm text-gray-500">
-                      Bid: ₹{bid.amount} · {new Date(bid.date).toLocaleDateString()}
+                      Bid: ${bid.amount} · {new Date(bid.date).toLocaleDateString()}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4 text-gray-500">
-                <p>You haven't placed any bids yet</p>
+              <div className="text-center py-4 border rounded-lg flex flex-col items-center p-8">
+                <AlertCircle className="w-12 h-12 text-gray-300 mb-4" />
+                <p className="text-gray-500 mb-4">You haven't placed any bids yet</p>
                 <Link
                   to="/auctions"
-                  className="text-book-accent hover:underline mt-2 inline-block"
+                  className="px-4 py-2 bg-book-accent text-white rounded-md hover:bg-book-accent/90 transition-colors"
                 >
                   Browse auctions
                 </Link>
@@ -265,6 +348,24 @@ const UserDashboard = () => {
           </TabsContent>
         </Tabs>
       </CardContent>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!bookToDelete} onOpenChange={() => setBookToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this book listing. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteBook} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

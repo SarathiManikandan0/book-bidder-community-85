@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { BookService } from "@/lib/bookService";
+import { FileService, UploadedFile } from "@/lib/fileService";
+import { toast as sonnerToast } from "@/components/ui/sonner";
+import { Upload, Image, X, Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -33,6 +37,10 @@ type BookFormData = {
   course: string;
   branch: string;
   coverImage: string;
+  isbn: string;
+  language: string;
+  pageCount: string;
+  genre: string[];
 };
 
 const initialFormData: BookFormData = {
@@ -44,12 +52,19 @@ const initialFormData: BookFormData = {
   year: "",
   course: "",
   branch: "",
-  coverImage: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop",
+  coverImage: "",
+  isbn: "",
+  language: "English",
+  pageCount: "",
+  genre: ["Academic"]
 };
 
 const SellBookForm = () => {
   const [formData, setFormData] = useState<BookFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -61,6 +76,46 @@ const SellBookForm = () => {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    setIsUploading(true);
+    
+    try {
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      // Upload the file
+      const uploadedFile = await FileService.uploadImage(file);
+      setUploadedFile(uploadedFile);
+      setFormData(prev => ({ ...prev, coverImage: uploadedFile.url }));
+      
+      sonnerToast("Image uploaded successfully", {
+        description: `${file.name} (${(file.size / 1024).toFixed(2)} KB)`,
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload image",
+        variant: "destructive",
+      });
+      setFilePreview(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const clearUploadedImage = () => {
+    setFilePreview(null);
+    setUploadedFile(null);
+    setFormData(prev => ({ ...prev, coverImage: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,25 +134,23 @@ const SellBookForm = () => {
     setIsSubmitting(true);
     
     try {
-      // In a real app, this would be an API call to your backend
-      // For now, we'll simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Create a book listing with the uploaded image
+      if (!user) throw new Error("User data not available");
       
-      // Create a mock book listing with user data
-      const newBook = {
+      const bookData = {
         ...formData,
-        id: `book-${Date.now()}`,
+        price: parseFloat(formData.price),
+        pageCount: parseInt(formData.pageCount || "0", 10),
+        sellerId: user.id,
         seller: {
-          id: user?.id,
-          name: user?.name,
-        },
-        listingDate: new Date().toISOString(),
+          id: user.id,
+          name: user.name,
+          rating: 4.5, // Default rating for new sellers
+          avatar: user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=250"
+        }
       };
       
-      // Store this in localStorage for demo purposes
-      const userBooks = JSON.parse(localStorage.getItem("user_books") || "[]");
-      userBooks.push(newBook);
-      localStorage.setItem("user_books", JSON.stringify(userBooks));
+      const newBook = BookService.addBook(bookData);
       
       toast({
         title: "Book listed successfully",
@@ -106,6 +159,11 @@ const SellBookForm = () => {
       
       // Reset form
       setFormData(initialFormData);
+      setFilePreview(null);
+      setUploadedFile(null);
+      
+      // Navigate to the book details page
+      navigate(`/books/${newBook.id}`);
     } catch (error) {
       console.error("Error listing book:", error);
       toast({
@@ -128,6 +186,61 @@ const SellBookForm = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Book Cover Image Upload */}
+          <div className="space-y-2">
+            <Label>Book Cover Image</Label>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className={`border-2 border-dashed rounded-md ${filePreview ? 'border-book-accent' : 'border-gray-300'} p-4 hover:bg-gray-50 transition-colors`}>
+                  {filePreview ? (
+                    <div className="relative w-full">
+                      <img 
+                        src={filePreview} 
+                        alt="Book cover preview" 
+                        className="mx-auto h-48 object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={clearUploadedImage}
+                        className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <Image className="h-12 w-12 text-gray-400" />
+                      <div className="mt-2 text-center">
+                        <Label 
+                          htmlFor="cover-image" 
+                          className="cursor-pointer text-book-accent hover:text-book-accent/90 font-medium inline-flex items-center"
+                        >
+                          <Upload className="h-4 w-4 mr-1" />
+                          Upload book cover
+                        </Label>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG or WEBP up to 5MB</p>
+                      </div>
+                    </div>
+                  )}
+                  <Input
+                    id="cover-image"
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                  />
+                  {isUploading && (
+                    <div className="flex justify-center items-center mt-2">
+                      <Loader2 className="h-4 w-4 animate-spin text-book-accent mr-2" />
+                      <span className="text-sm text-gray-500">Uploading...</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="title">Book Title*</Label>
@@ -168,7 +281,7 @@ const SellBookForm = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Price (₹)*</Label>
+              <Label htmlFor="price">Price ($)*</Label>
               <Input
                 id="price"
                 name="price"
@@ -197,6 +310,53 @@ const SellBookForm = () => {
                   <SelectItem value="Poor">Poor</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="language">Language</Label>
+              <Select 
+                value={formData.language} 
+                onValueChange={(value) => handleSelectChange("language", value)}
+              >
+                <SelectTrigger id="language">
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="English">English</SelectItem>
+                  <SelectItem value="Spanish">Spanish</SelectItem>
+                  <SelectItem value="French">French</SelectItem>
+                  <SelectItem value="German">German</SelectItem>
+                  <SelectItem value="Chinese">Chinese</SelectItem>
+                  <SelectItem value="Japanese">Japanese</SelectItem>
+                  <SelectItem value="Korean">Korean</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="isbn">ISBN</Label>
+              <Input
+                id="isbn"
+                name="isbn"
+                value={formData.isbn}
+                onChange={handleChange}
+                placeholder="ISBN identifier"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="pageCount">Page Count</Label>
+              <Input
+                id="pageCount"
+                name="pageCount"
+                type="number"
+                value={formData.pageCount}
+                onChange={handleChange}
+                placeholder="Number of pages"
+              />
             </div>
             
             <div className="space-y-2">
@@ -246,7 +406,12 @@ const SellBookForm = () => {
           
           <CardFooter className="px-0 pt-4">
             <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? "Listing book..." : "List Book for Sale"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Listing book...
+                </>
+              ) : "List Book for Sale"}
             </Button>
           </CardFooter>
         </form>

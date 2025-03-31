@@ -1,117 +1,77 @@
 
 /* Mobile-specific styles */
 
-/* Better tap targets for mobile */
 @media (max-width: 768px) {
+  .book-card {
+    animation: fade-in 0.6s ease-out forwards;
+  }
+  
+  /* Custom animations for mobile */
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Improve tap target sizes for mobile */
   button, 
-  a, 
-  [role="button"],
-  input[type="submit"] {
+  a {
     min-height: 44px;
     min-width: 44px;
   }
   
-  /* Hide scrollbar but allow scrolling */
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  
-  /* Improve form inputs on mobile */
-  input, select, textarea {
-    font-size: 16px !important; /* Prevents iOS zoom on focus */
-  }
-  
-  /* Mobile-friendly card styling */
-  .mobile-card {
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    background: white;
-  }
-  
-  /* Add safe area insets for notched phones */
-  .safe-area-inset {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  /* Improved mobile navigation for bottom tabs */
-  .mobile-nav-bottom {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    border-top: 1px solid #eee;
-    padding: 10px 0;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
-    display: flex;
-    justify-content: space-around;
-    z-index: 50;
-  }
-  
-  /* Bottom sheet styles */
-  .bottom-sheet {
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Pull-to-refresh visual indicator */
-  .pull-indicator {
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #888;
+  /* Improve form field sizes on mobile */
+  input, 
+  textarea, 
+  select {
+    font-size: 16px; /* Prevents iOS zoom on focus */
   }
 }
 
-/* Smooth animations for mobile interactions */
-.slide-up {
-  animation: slideUp 0.3s ease forwards;
+/* Shared responsive styles */
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
 }
 
-.slide-down {
-  animation: slideDown 0.3s ease forwards;
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
 }
 
-@keyframes slideUp {
+@keyframes fade-in {
   from {
-    transform: translateY(100%);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
     opacity: 1;
   }
 }
 
-@keyframes slideDown {
+@keyframes fade-in-up {
   from {
-    transform: translateY(0);
-    opacity: 1;
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
-    transform: translateY(100%);
-    opacity: 0;
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Add bottom spacing for content to account for fixed elements */
-.has-bottom-nav {
-  padding-bottom: 70px;
+/* Book card animations */
+.book-card {
+  animation: fade-in 0.6s ease-out forwards;
 }
 
-/* Optimized touch targets for lists */
-.touch-list > * {
-  padding-top: 12px;
-  padding-bottom: 12px;
+/* Shadow effects */
+.shadow-book {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-smooth {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
