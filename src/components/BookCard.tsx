@@ -23,6 +23,7 @@ const BookCard = ({ book, className, animationDelay = 0 }: BookCardProps) => {
     condition 
   } = book;
   
+  
   const formattedPrice = BookService.formatPrice(isAuction ? auctionData?.currentBid || 0 : price);
 
   const timeLeft = () => {
