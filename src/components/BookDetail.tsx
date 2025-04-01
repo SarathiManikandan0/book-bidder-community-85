@@ -2,6 +2,7 @@
 import { Book } from '@/lib/data';
 import { Check, Award, Clock, AlertCircle } from 'lucide-react';
 import LiveBidInterface from './LiveBidInterface';
+import { BookService } from '@/lib/bookService';
 
 interface BookDetailProps {
   book: Book;
@@ -31,10 +32,7 @@ const BookDetail = ({ book }: BookDetailProps) => {
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
   
-  const formattedPrice = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(isAuction ? auctionData?.currentBid || 0 : price);
+  const formattedPrice = BookService.formatPrice(isAuction ? auctionData?.currentBid || 0 : price);
   
   const timeLeft = () => {
     if (!auctionData) return '';

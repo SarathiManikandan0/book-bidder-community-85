@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Clock, ArrowUp, Award } from 'lucide-react';
 import { Book } from '@/lib/data';
 import { cn } from '@/lib/utils';
+import { BookService } from '@/lib/bookService';
 
 interface BookCardProps {
   book: Book;
@@ -22,10 +23,7 @@ const BookCard = ({ book, className, animationDelay = 0 }: BookCardProps) => {
     condition 
   } = book;
   
-  const formattedPrice = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(isAuction ? auctionData?.currentBid || 0 : price);
+  const formattedPrice = BookService.formatPrice(isAuction ? auctionData?.currentBid || 0 : price);
 
   const timeLeft = () => {
     if (!auctionData) return '';

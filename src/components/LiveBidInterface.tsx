@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, TrendingUp, Award } from 'lucide-react';
 import { Book } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { BookService } from '@/lib/bookService';
 
 interface LiveBidInterfaceProps {
   book: Book;
@@ -66,7 +67,7 @@ const LiveBidInterface = ({ book }: LiveBidInterfaceProps) => {
         
         toast({
           title: "New bid!",
-          description: `Someone just bid $${newBid.toFixed(2)}`,
+          description: `Someone just bid ${BookService.formatPrice(newBid)}`,
           variant: "default",
         });
       }
@@ -83,7 +84,7 @@ const LiveBidInterface = ({ book }: LiveBidInterfaceProps) => {
     if (!bidAmount || bidAmount <= currentBid) {
       toast({
         title: "Invalid bid",
-        description: `Your bid must be at least $${minBid.toFixed(2)}`,
+        description: `Your bid must be at least ${BookService.formatPrice(minBid)}`,
         variant: "destructive",
       });
       return;
@@ -100,7 +101,7 @@ const LiveBidInterface = ({ book }: LiveBidInterfaceProps) => {
       
       toast({
         title: "Bid placed!",
-        description: `Your bid of $${Number(bidAmount).toFixed(2)} was successful`,
+        description: `Your bid of ${BookService.formatPrice(Number(bidAmount))} was successful`,
         variant: "default",
       });
     }, 1000);
@@ -113,7 +114,7 @@ const LiveBidInterface = ({ book }: LiveBidInterfaceProps) => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <p className="text-sm text-gray-500">Current Bid</p>
-          <p className="text-3xl font-bold text-book-bidding">${currentBid.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-book-bidding">{BookService.formatPrice(currentBid)}</p>
           <p className="text-sm text-gray-500 mt-1">
             {bidsCount} {bidsCount === 1 ? 'bid' : 'bids'} so far
           </p>
@@ -142,11 +143,11 @@ const LiveBidInterface = ({ book }: LiveBidInterfaceProps) => {
             step="1"
             value={bidAmount}
             onChange={(e) => setBidAmount(e.target.value ? Number(e.target.value) : '')}
-            placeholder={`$${minBid.toFixed(2)} or more`}
+            placeholder={`${BookService.formatPrice(minBid)} or more`}
             className="w-full"
             disabled={loading}
           />
-          <p className="text-xs text-gray-500 mt-1">Enter {minBid.toFixed(2)} or more</p>
+          <p className="text-xs text-gray-500 mt-1">Enter {BookService.formatPrice(minBid)} or more</p>
         </div>
         <Button 
           className="bg-book-bidding hover:bg-book-bidding/90"
