@@ -14,13 +14,16 @@ import {
   User, 
   Star, 
   ArrowRight,
-  ChevronDown 
+  ChevronDown,
+  ShoppingCart,
+  Check 
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import LiveBidInterface from './LiveBidInterface';
 import { BookService } from '@/lib/bookService';
+import { useCart } from '@/contexts/CartContext';
 
 interface BookDetailMobileProps {
   book: Book;
@@ -30,6 +33,7 @@ interface BookDetailMobileProps {
 const BookDetailMobile = ({ book, onNavigateBack }: BookDetailMobileProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const { addToCart, isBookInCart } = useCart();
   
   // Add swipe to go back functionality
   useTouchGestures(containerRef, {
@@ -47,7 +51,8 @@ const BookDetailMobile = ({ book, onNavigateBack }: BookDetailMobileProps) => {
     
     return `Ends ${formatDistanceToNow(end, { addSuffix: true })}`;
   };
-    const handleAddToCart = () => {
+
+  const handleAddToCart = () => {
     if (!book.isAuction && !alreadyInCart) {
       addToCart(book);
     }
@@ -152,12 +157,28 @@ const BookDetailMobile = ({ book, onNavigateBack }: BookDetailMobileProps) => {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <Button className="w-full bg-book-accent hover:bg-book-accent/90">
-              Buy Now ({BookService.formatPrice(book.price)})
+            <Button 
+              className={`w-full flex items-center justify-center ${alreadyInCart ? 'bg-green-600 hover:bg-green-700' : 'bg-book-accent hover:bg-book-accent/90'}`}
+              onClick={handleAddToCart}
+              disabled={alreadyInCart}
+            >
+              {alreadyInCart ? (
+                <>
+                  <Check className="w-4 h-4 mr-2" />
+                  Added
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Add to Cart
+                </>
+              )}
             </Button>
-            <Button variant="outline" className="w-full">
-              Add to Cart
-            </Button>
+            <Link to="/cart">
+              <Button variant="outline" className="w-full">
+                View Cart
+              </Button>
+            </Link>
           </div>
         )}
         
