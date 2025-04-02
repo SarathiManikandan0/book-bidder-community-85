@@ -1,8 +1,9 @@
 
 import { Book } from '@/lib/data';
-import { Check, Award, Clock, AlertCircle } from 'lucide-react';
+import { Check, Award, Clock, AlertCircle, ShoppingCart } from 'lucide-react';
 import LiveBidInterface from './LiveBidInterface';
 import { BookService } from '@/lib/bookService';
+import { useCart } from '@/contexts/CartContext';
 
 interface BookDetailProps {
   book: Book;
@@ -27,6 +28,9 @@ const BookDetail = ({ book }: BookDetailProps) => {
     views
   } = book;
   
+  const { addToCart, isBookInCart } = useCart();
+  const alreadyInCart = isBookInCart(book.id);
+
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
@@ -49,7 +53,8 @@ const BookDetail = ({ book }: BookDetailProps) => {
     
     return `${days > 0 ? `${days} days, ` : ''}${hours} hours, ${minutes} minutes`;
   };
-    const handleAddToCart = () => {
+
+  const handleAddToCart = () => {
     if (!alreadyInCart && !isAuction) {
       addToCart(book);
     }
@@ -152,8 +157,25 @@ const BookDetail = ({ book }: BookDetailProps) => {
                   </p>
                 </div>
                 
-                <button className="px-6 py-3 bg-book-accent text-white rounded-md hover:bg-book-accent/90 transition-colors">
-                  Buy Now
+                <button 
+                  onClick={handleAddToCart}
+                  className={`px-6 py-3 rounded-md flex items-center transition-colors ${
+                    alreadyInCart 
+                      ? 'bg-green-600 text-white hover:bg-green-700' 
+                      : 'bg-book-accent text-white hover:bg-book-accent/90'
+                  }`}
+                >
+                  {alreadyInCart ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Added to Cart
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Add to Cart
+                    </>
+                  )}
                 </button>
               </div>
             )}
