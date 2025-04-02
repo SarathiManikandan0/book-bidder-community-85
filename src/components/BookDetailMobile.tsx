@@ -47,6 +47,13 @@ const BookDetailMobile = ({ book, onNavigateBack }: BookDetailMobileProps) => {
     
     return `Ends ${formatDistanceToNow(end, { addSuffix: true })}`;
   };
+    const handleAddToCart = () => {
+    if (!book.isAuction && !alreadyInCart) {
+      addToCart(book);
+    }
+  };
+
+  const alreadyInCart = isBookInCart(book.id);
   
   return (
     <div 
