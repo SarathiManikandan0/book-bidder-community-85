@@ -49,6 +49,11 @@ const BookDetail = ({ book }: BookDetailProps) => {
     
     return `${days > 0 ? `${days} days, ` : ''}${hours} hours, ${minutes} minutes`;
   };
+    const handleAddToCart = () => {
+    if (!alreadyInCart && !isAuction) {
+      addToCart(book);
+    }
+  };
 
   return (
     <div className="animate-fade-in">
